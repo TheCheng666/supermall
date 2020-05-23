@@ -1,12 +1,14 @@
 <template>
   <div id="home">
     <nav-bar class="home-nav"><div slot="center">超级商城</div></nav-bar>
-    <home-swiper :banners="banners" />
-    <home-recommend-view :recommends="recommends" />
-    <feature-view/>
-    <tab-control class="tab-control" 
-    :titles="['流行','新款','精选']" @tabClick="tabClick" />
-    <goods-list :goods="showGoods" />
+    <scroll class="content">
+      <home-swiper :banners="banners" />
+      <home-recommend-view :recommends="recommends" />
+      <feature-view/>
+      <tab-control class="tab-control" 
+      :titles="['流行','新款','精选']" @tabClick="tabClick" />
+      <goods-list :goods="showGoods" />
+    </scroll>
   </div>
 </template>
 
@@ -18,6 +20,7 @@ import FeatureView from './childComps/FeatureView'
 import NavBar from 'components/common/navbar/NavBar'
 import TabControl from 'components/content/tabControl/TabControl'
 import GoodsList from 'components/content/goods/GoodsList'
+import Scroll from 'components/common/scroll/Scroll'
 
 import {getHomeMultidata,getHomeGoods} from 'network/home'
 
@@ -30,6 +33,7 @@ export default {
     NavBar,
     TabControl,
     GoodsList,
+    Scroll
   },
   data() {
     return {
@@ -90,9 +94,10 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 #home {
-  padding-top: 44px;
+  position: relative;
+  height: 100vh;
 }
 
 .home-nav {
@@ -110,5 +115,12 @@ export default {
   position: sticky;
   top: 44px;
   z-index: 9;
+}
+
+.content {
+  overflow: hidden;
+  position: absolute;
+  top: 44px;
+  bottom: 49px;
 }
 </style>
