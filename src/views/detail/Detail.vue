@@ -1,8 +1,13 @@
 <template>
   <div id="detail">
-    <detail-nav-bar/>
-    <detail-swiper :top-images="topImages" />
-    <detail-base-show :goods="goods" />
+    <detail-nav-bar class="detail-nav" />
+    <scroll class="content" ref="scroll">
+      <detail-swiper :top-images="topImages" />
+      <detail-base-show :goods="goods" />
+      <detail-shop-show :shop="shop" />
+      <detail-goods-show :detail-info="detailInfo" @imgLoad="imgLoad" />
+      <detail-param-show :param-info="paramInfo" />
+    </scroll>
   </div>
 </template>
 
@@ -10,21 +15,33 @@
 import DetailNavBar from './childComps/DetailNavBar'
 import DetailSwiper from './childComps/DetailSwiper'
 import DetailBaseShow from './childComps/DetailBaseShow'
+import DetailShopShow from './childComps/DetailShopShow'
+import DetailGoodsShow from './childComps/DetailGoodsShow'
+import DetailParamShow from './childComps/DetailParamShow'
 
-import {getDetail, Goods} from 'network/detail'
+import Scroll from 'components/common/scroll/Scroll'
+
+import {getDetail, Goods, Shop, GoodsParam} from 'network/detail'
 
 export default {
   name: "Detail",
   components: {
     DetailNavBar,
     DetailSwiper,
-    DetailBaseShow
+    DetailBaseShow,
+    DetailShopShow,
+    DetailGoodsShow,
+    DetailParamShow,
+    Scroll,
   },
   data() {
     return {
       iid: null,
       topImages: [],
-      goods: {}
+      goods: {},
+      shop: {},
+      detailInfo: {},
+      paramInfo: {},
     }
   },
   created() {
@@ -39,11 +56,40 @@ export default {
 
       // 2.获取商品信息
       this.goods = new Goods(data.itemInfo, data.columns, data.shopInfo.services)
+
+      // 3.获取店铺信息
+      this.shop = new Shop(data.shopInfo)
+
+      // 4.获取商品详情信息
+      this.detailInfo = data.detailInfo
+
+      // 5.获取参数的信息
+      this.paramInfo = new GoodsParam(data.itemParams.info, data.itemParams.rule)
     })
+  },
+  methods: {
+    imgLoad() {
+      this.$refs.scroll.refresh()
+    }
   }
 }
 </script>
 
 <style scoped>
+#detail {
+  position: relative;
+  z-index: 9;
+  background-color: #fff;
+  height: 100vh;
+}
 
+.detail-nav {
+  position: relative;
+  z-index: 9;
+  background-color: #fff;
+}
+
+.content {
+  height: calc(100% - 44px);
+}
 </style>

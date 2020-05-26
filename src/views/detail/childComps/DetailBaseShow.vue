@@ -85,7 +85,8 @@ export default {
 .services {
   margin-top: 20px;
   display: flex;
-  margin-bottom: 100px;
+  padding-bottom: 20px;
+  box-shadow: 0 1px 1px rgba(100,100,100,.1);
 }
 
 .services>span {
