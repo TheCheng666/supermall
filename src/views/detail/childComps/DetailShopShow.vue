@@ -51,7 +51,6 @@ export default {
 
 <style scoped>
 .detail-shop-show {
-  padding-bottom: 30px;
   box-shadow: 0 1px 1px rgba(100,100,100,.1);
 }
 

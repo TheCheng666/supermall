@@ -1,12 +1,14 @@
 <template>
   <div id="detail">
-    <detail-nav-bar class="detail-nav" />
-    <scroll class="content" ref="scroll">
+    <detail-nav-bar class="detail-nav" @titleClick="titleClick" ref="nav" />
+    <scroll class="content" ref="scroll" :probe-type="3" @scroll="contentScroll">
       <detail-swiper :top-images="topImages" />
       <detail-base-show :goods="goods" />
       <detail-shop-show :shop="shop" />
       <detail-goods-show :detail-info="detailInfo" @imgLoad="imgLoad" />
-      <detail-param-show :param-info="paramInfo" />
+      <detail-param-show ref="param" :param-info="paramInfo" />
+      <detail-comment ref="comment" :comment-info="commentInfo" />
+      <goods-list ref="recommend" :goods="recommends" />
     </scroll>
   </div>
 </template>
@@ -18,10 +20,13 @@ import DetailBaseShow from './childComps/DetailBaseShow'
 import DetailShopShow from './childComps/DetailShopShow'
 import DetailGoodsShow from './childComps/DetailGoodsShow'
 import DetailParamShow from './childComps/DetailParamShow'
+import DetailComment from './childComps/DetailComment'
 
 import Scroll from 'components/common/scroll/Scroll'
+import GoodsList from 'components/content/goods/GoodsList'
 
-import {getDetail, Goods, Shop, GoodsParam} from 'network/detail'
+import {getDetail, getRecommend, Goods, Shop, GoodsParam} from 'network/detail'
+import {debounce} from 'common/utils'
 
 export default {
   name: "Detail",
@@ -32,7 +37,9 @@ export default {
     DetailShopShow,
     DetailGoodsShow,
     DetailParamShow,
+    DetailComment,
     Scroll,
+    GoodsList
   },
   data() {
     return {
@@ -42,6 +49,12 @@ export default {
       shop: {},
       detailInfo: {},
       paramInfo: {},
+      commentInfo: {},
+      recommends: [],
+      itemImageListener: null,
+      themeTopYs: [],
+      getThemeTopY: null,
+      currentIndex: 0
     }
   },
   created() {
@@ -65,11 +78,60 @@ export default {
 
       // 5.获取参数的信息
       this.paramInfo = new GoodsParam(data.itemParams.info, data.itemParams.rule)
+
+      // 6.获取评论的信息
+      if (data.rate.cRate !== 0) {
+        this.commentInfo = data.rate.list[0]
+      }
     })
+
+    // 3.请求推荐数据
+    getRecommend().then(res => {
+      this.recommends = res.data.list
+    })
+
+    // 4.给getThemeTopY赋值
+    this.getThemeTopY = debounce(() => {
+      this.themeTopYs = []
+      this.themeTopYs.push(0)
+      this.themeTopYs.push(this.$refs.param.$el.offsetTop - 44)
+      this.themeTopYs.push(this.$refs.comment.$el.offsetTop - 44)
+      this.themeTopYs.push(this.$refs.recommend.$el.offsetTop -44)
+    })
+  },
+  mounted() {
+    const refresh = debounce(this.$refs.scroll.refresh)
+
+    this.itemImageListener = () => {
+      refresh()
+    }
+
+    this.$bus.$on('itemImageLoad', this.itemImageListener)
+  },
+  destroyed() {
+    this.$bus.$off('itemImageLoad', this.itemImageListener)
   },
   methods: {
     imgLoad() {
       this.$refs.scroll.refresh()
+
+      this.getThemeTopY()
+    },
+    titleClick(index) {
+      this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 500)
+    },
+    contentScroll(position) {
+      // 1.获取y值
+      const positionY = -position.y
+
+      // 2.positionY和主题中值进行对比
+      let length = this.themeTopYs.length
+      for(let i = 0; i < length; i++) {
+        if(this.currentIndex !== i && ((i < length - 1 && positionY > this.themeTopYs[i] && positionY < this.themeTopYs[i+1]) || (i === length - 1 && positionY > this.themeTopYs[i]))) {
+          this.currentIndex = i;
+          this.$refs.nav.currentIndex = this.currentIndex
+        }
+      }
     }
   }
 }
