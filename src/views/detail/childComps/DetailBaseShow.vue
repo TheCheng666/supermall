@@ -65,6 +65,8 @@ export default {
 }
 
 .discount {
+  padding-left: 10px;
+  padding-right: 10px;
   color: #fff;
   background-color: red;
   border-radius: 10px;
