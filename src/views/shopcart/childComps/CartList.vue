@@ -1,7 +1,7 @@
 <template>
   <div class="cart-list">
     <scroll  class="content" ref="scroll">
-      <cart-list-item v-for="(item, index) in $store.state.cartList" :key="index" :product="item" />
+      <cart-list-item v-for="(item, index) in $store.state.cartList" :key="index" :itemInfo="item" />
     </scroll>
   </div>
 </template>
@@ -25,11 +25,11 @@ export default {
 
 <style scoped>
 .cart-list {
-  height: 100%;
+  height: calc(100% - 44px - 49px - 40px);
 }
 
 .content {
-  height: calc(100% - 44px - 49px);
+  height: 100%;
   overflow: hidden;
 }
 </style>
